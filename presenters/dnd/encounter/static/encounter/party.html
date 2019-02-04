@@ -1,0 +1,44 @@
+<div class='party' style="display:flex;flex-wrap: wrap">
+    <div class='member' ng-repeat="member in members" ng-class="{selected_target: $parent.target==member}">
+        <h4 ng-click="$parent.target = member">{{ member.name }}</h4>
+        <span>{{ member.size }} {{ member.speed }}</span>
+        <table>
+            <tr> <th>AC</th> <th>HP </th><th>Ini</th>
+            </tr>
+            <tr>
+                <td><input ng-model="member.ac[0]" type="number"></td>
+                <td><input ng-model="member.hp" type="number"></td>
+                <td><input ng-model="member.initiative" type="number"></td>
+            </tr>
+        </table>
+        <div class="attacks">
+            <h5>Attacks</h5>
+                <div class="attack" ng-repeat="attack in member.attacks" ng-click="$parent.$parent.attack = attack;"
+                    ng-class="{selected_attack: $parent.$parent.attack==attack}">
+                    <span title="{{ attack.to_hit }}@{{ attack.damage[0] }}d{{ attack.damage[1] }} {{ attack.damage[2] }}
+                    {{ attack.range }}
+                    {{ attack.description }} ">{{ attack.name }} </span>
+                </div>
+        </div>
+        <div class="traits" ng-show="member.traits">
+            <h5>Traits</h5>
+                <div class="trait" ng-repeat="t in member.traits"><trait t="t"></trait></div>
+        </div>
+        <div class="senses" ng-show="member.senses">
+            <h5>Senses</h5>
+            <div class="trait">{{ member.senses}}</div>
+        </div>
+        <div class="actions" ng-show="member.actions">
+            <h5>Actions</h5>
+            <div class="trait" ng-repeat="t in member.actions"><trait t="t"></trait></div>
+        </div>
+        <div class="actions" ng-show="member.reactions">
+            <h5>Reactions</h5>
+            <div class="trait" ng-repeat="t in member.reactions"><trait t="t"></trait></div>
+        </div>
+        <div class="actions" ng-show="member.spells">
+            <h5>Spells</h5>
+            <div class="trait" ng-repeat="t in member.spells">{{ t}}</div>
+        </div>
+    </div>
+</div>

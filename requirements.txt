@@ -1,0 +1,5 @@
+djangorestframework
+django
+pandas
+markdown
+django-filter

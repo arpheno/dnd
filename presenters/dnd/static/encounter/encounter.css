@@ -1,0 +1,7 @@
+.selected_attack {
+    background-color: yellow
+}
+.selected_target {
+    background-color: #ff96a4;
+}
+input{border:none;display:inline;}

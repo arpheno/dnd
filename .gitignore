@@ -1,0 +1,9 @@
+# Created by .ignore support plugin (hsz.mobi)
+
+*.js
+*.json
+*.csv
+*.sqlite3
+venv/
+*.xml
+*.iml
