@@ -5,10 +5,11 @@ from pprint import pprint
 from django.http import JsonResponse
 from django.utils.http import urlunquote
 from django.views.generic import TemplateView
+from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 from rest_framework.viewsets import ModelViewSet
 
-from encounter.models import Character, Armor, Attack
+from encounter.models import Character, Encounter
 from monsters.browser import load_monsters
 from party.browser import load_party
 from region import build_random_encounter
@@ -20,7 +21,7 @@ class EncounterView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super(EncounterView, self).get_context_data(**kwargs)
         party = load_party()
-        encounter = build_random_encounter('Arctic', [1, 1, 1])
+        encounter = build_random_encounter('Arctic', [2, 2, 2])
         pprint(encounter)
         context['encounter'] = json.dumps(encounter)
         context['party'] = json.dumps(list(x for x in party.values()))
@@ -75,6 +76,23 @@ class MonsterDetailView(TemplateView):
 
 
 class CharacterSerializer(ModelSerializer):
+    # armor = serializers.StringRelatedField()
+
+    class Meta:
+        model = Character
+        fields = ['id', 'name', 'scores', 'hitpoints', 'speed', 'alignment',
+                  'monster_type', 'level', 'gold', 'experience', 'race', 'category']
+
+    def create(self, validated_data):
+        print(validated_data)
+        return super(CharacterSerializer, self).create(validated_data)
+
+    scores = serializers.DictField()
+
+
+class CharacterDetailSerializer(ModelSerializer):
+    armor = serializers.StringRelatedField()
+
     class Meta:
         model = Character
         fields = '__all__'
@@ -84,24 +102,62 @@ class CharacterViewSet(ModelViewSet):
     queryset = Character.objects.all()
     serializer_class = CharacterSerializer
 
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return CharacterDetailSerializer
+        return super(CharacterViewSet, self).get_serializer_class()
 
-class ArmorSerializer(ModelSerializer):
+
+class LevelView(TemplateView):
+    template_name = "encounter/encounter_detail.html"
+
+    def get_context_data(self, **kwargs):
+        print(kwargs['cls'], kwargs['level'])
+        levels = json.load(open('../../levels/5e-SRD-Levels.json'))
+        for level in levels:
+            if level['class']['name'].lower() == kwargs['cls'] and level['level'] == kwargs['level']:
+                print(level)
+                return level
+
+    def render_to_response(self, context, **response_kwargs):
+        return JsonResponse(
+            context, safe=False,
+            **response_kwargs
+        )
+
+
+class FeatureView(TemplateView):
+    template_name = "encounter/encounter_detail.html"
+
+    def get_context_data(self, **kwargs):
+        features = json.load(open('../../levels/5e-SRD-Features.json'))
+        for feature in features:
+            if feature['index'] == kwargs['index']:
+                print(feature)
+                return feature
+
+    def render_to_response(self, context, **response_kwargs):
+        return JsonResponse(
+            context, safe=False,
+            **response_kwargs
+        )
+
+class naivejson(serializers.JSONField):
+    def to_representation(self, value):
+        try:
+            return json.dumps(eval(value))
+        except:
+            print(value)
+            return json.dumps(value)
+class EncounterSerializer(ModelSerializer):
+    members = naivejson()
+    map = naivejson()
+
     class Meta:
-        model = Armor
+        model = Encounter
         fields = '__all__'
 
 
-class ArmorViewSet(ModelViewSet):
-    queryset = Armor.objects.all()
-    serializer_class = ArmorSerializer
-
-
-class AttackSerializer(ModelSerializer):
-    class Meta:
-        model = Attack
-        fields = '__all__'
-
-
-class AttackViewSet(ModelViewSet):
-    queryset = Attack.objects.all()
-    serializer_class = AttackSerializer
+class EncounterViewSet(ModelViewSet):
+    queryset = Encounter.objects.all()
+    serializer_class = EncounterSerializer

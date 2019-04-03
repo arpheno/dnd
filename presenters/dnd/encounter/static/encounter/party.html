@@ -1,3 +1,4 @@
+
 <div class='party' style="display:flex;flex-wrap: wrap">
     <div class='member' ng-repeat="member in members" ng-class="{selected_target: $parent.target==member}">
         <h4 ng-click="$parent.target = member">{{ member.name }}</h4>
@@ -11,6 +12,13 @@
                 <td><input ng-model="member.initiative" type="number"></td>
             </tr>
         </table>
+        <h5>Saves</h5>
+        <table>
+            <tr>
+                <td ng-repeat="save in ['str','dex','con','int','wis','cha']"><button ng-click="member.roll_save(save)">{{ save }}</button></td>
+            </tr>
+        </table>
+        {{ member.roll }}
         <div class="attacks">
             <h5>Attacks</h5>
                 <div class="attack" ng-repeat="attack in member.attacks" ng-click="$parent.$parent.attack = attack;"
@@ -42,3 +50,5 @@
         </div>
     </div>
 </div>
+<input type="text" ng-model="partyadd"><button ng-click="addmember()">Add member</button>
+Total xp {{ sumxp() }}

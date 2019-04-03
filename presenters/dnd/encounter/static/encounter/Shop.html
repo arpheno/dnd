@@ -1,0 +1,28 @@
+<style>
+    .shop entitylist .entity{
+        background-color: blue;
+        margin: 5px;
+        padding:5px;
+        width:200px;
+    }
+    .category{
+        order:-1;
+    }
+    .category .attribute, .name .attribute{
+        display:none;
+    }
+    .shop entitylist .id{
+        visibility: hidden;
+        display:none;
+    }
+    .shop{
+        background-color: #5b80b2;
+    }
+    .shop .delete{
+        display: none;}
+</style>
+<div class="shop">
+    <entitylist entities="armors" title="'Available Armors'"></entitylist>
+    <entitylist entities="weapons" title="'Available Weapons'"></entitylist>
+    <entitylist entities="adventuring_gear" title="'Available Gear'"></entitylist>
+</div>

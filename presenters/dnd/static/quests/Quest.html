@@ -1,0 +1,33 @@
+<style>.quest > div {
+    padding: 10px;
+    width: 300px;
+}
+.quest>div>div{
+    padding:5px;
+}</style>
+<div style="display: flex; flex-wrap:wrap;" class="quest">
+    <div>
+        <h3>{{ q.name }}</h3>
+        <div style="background-color: #5897fb;color: ivory">{{ q.bluetext }}</div>
+    </div>
+    <div>
+        <h4>Description</h4>
+
+        <div>{{ q.description }}</div>
+    </div>
+    <div>
+        <h4>Combat</h4>
+
+        <div>{{ q.combat }}</div>
+
+    </div>
+    <div>
+        <h4>Traps</h4>
+        <div>{{ q.traps }}</div>
+    </div>
+    <div>
+        <h4>Loot</h4>
+        <div>{{ q.loot }}</div>
+    </div>
+</div>
+

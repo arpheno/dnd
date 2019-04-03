@@ -1,0 +1,9 @@
+<h4>{{ title }}</h4>
+<div style="display:flex;flex-wrap:wrap;">
+    <div ng-repeat="entity in entities" class="entity"style="display:flex;flex-direction: column" >
+        <div ng-repeat="(attribute,value) in entity" class="{{ attribute }}" ng-show="value" >
+            <span class="attribute">{{ attribute }}: </span><span class="value">{{ value }}</span>
+        </div>
+        <span class="delete" color="red" ng-click="delete_entity(entity)">X</span>
+    </div>
+</div>

@@ -1,167 +1,54 @@
 {% load static %}
-<html>
+<html ng-app="scotchApp">
 <head>
+    <link rel="stylesheet"
+          href="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.12/angular-material.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular-resource.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular-route.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular-animate.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular-aria.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular-messages.min.js"></script>
+
+    <!-- Angular Material Library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.12/angular-material.min.js"></script>
+
     <script src="{% static "encounter/encounter.js" %}"></script>
+    <script src="{% static "encounter/app.js" %}"></script>
     <title></title>
     <LINK href="{% static "encounter/encounter.css" %}" rel="stylesheet" type="text/css">
 </head>
-<script>
-    var app = angular.module("myShoppingList", ['ngResource']);
 
-    function roll(x, d) {
-        s = 0;
-        for (i = 0; i < x; i++) {
-            s += Math.floor(Math.random() * d) + 1;
-        }
-        return s
-    }
 
-    app.controller("myCtrl", function ($scope, $http, $resource) {
-        Armor = $resource('/api/armors/:armorID', {armorId: '@id'});
-        Armor.query().$promise.then(x=>console.log(x));
-        $scope.remove = function (array, index) {
-            array.splice(index, 1);
-        };
-        $scope.map_name = x => x.name;
-        $scope.encounters = [];
-        $scope.encounter = [];
-        $scope.good = [];
-        $scope.css = "Kobold,Lich";
-        $http.get('/party').then(function (response) {
-            $scope.good = response.data;
-        });
-        $scope.roll_initiative = function (all) {
-            all.forEach(function (monster) {
-                console.log(monster)
-                monster.initiative = roll(1, 20) + monster.modifiers['dex'];
-            });
-        };
-        $scope.roll_dice = function (r) {
-            q = r.split('d')
-            n = q[0];
-            x = q[1];
-            $scope.rolls = [];
-            for (i = 0; i < n; i++) {
-                $scope.rolls.push(roll(1, x));
-            }
-            $scope.roll_sum = $scope.rolls.reduce((a, b) => a + b, 0);
-        }
-        $scope.attack = '';
-        $scope.biome = 'Arctic';
-        $scope.target = '1';
-        $scope.execute_attack = execute_attack;
-        $scope.random_encounter = function (difficulty) {
-            $http.get('/random_encounter/' + $scope.biome + '/' + difficulty).then(function (response) {
-                encounter = [];
-                $scope.encounters.push(encounter);
-                $scope.encounter = encounter;
-                response.data.forEach(function (element) {
-                    $http.get(`/monster/${element}/`).then(function (response) {
-                        monster = response.data
-                        monster.hp = roll(monster.hd[0], monster.hd[1]) + monster.modifiers['con'] * monster.hd[0];
-                        encounter.push(response.data);
-                    });
-                });
-            });
-        };
-        $scope.determined_encounter = function (css) {
-            encounter_names = css.split(',');
-            encounter = [];
-            console.log(`its ${encounter.length}`);
-            $scope.encounters.push(encounter);
-            $scope.encounter = encounter;
-            encounter_names.forEach(function (element) {
-                if (element != '') {
-                    $http.get(`/monster/${element}/`).then(function (response) {
-                        monster = response.data;
-                        monster.hp = roll(monster.hd[0], monster.hd[1]) + monster.modifiers['con'] * monster.hd[0];
-                        encounter.push(response.data);
-                    });
-                }
-            });
-        }
-    }).directive('party', function () {
-        return {
-            templateUrl: '{% static "encounter/party.html" %}',
-            scope: {
-                members: '=members',
-                target: '=',
-                attack: '=',
-            }
-            ,
-        }
-    }).directive('trait', function () {
-        return {templateUrl: '{% static "encounter/trait.html" %}', scope: {t: '=',}}
-    });</script>
-
-{% verbatim %}
-<body ng-app="myShoppingList">
-<div ng-controller="myCtrl" style="display: flex;flex-wrap: wrap">
-    <div>
-        <h5>Attack</h5>
-        <div style="display: flex;flex-direction: column">
-            <div><input type="radio"
-                        ng-model="advantage"
-                        value="string"
-                        ng-value=1>Advantage
+<!-- HEADER AND NAVBAR -->
+<body>
+<header>
+    <nav class="navbar navbar-default">
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="/">Angular Routing Example</a>
             </div>
-            <div><input type="radio"
-                        ng-model="advantage"
-                        value="string"
-                        ng-value=0>No Advantage
-            </div>
-            <div><input type="radio"
-                        ng-model="advantage"
-                        value="string"
-                        ng-value=-1>Disadvantage
-            </div>
-            <button ng-click="execute_attack(target,attack,advantage)">attack</button>
-        </div>
-        <div>
-            <h5>Initiative</h5>
-            <button ng-click="roll_initiative()">Roll!</button>
-            <ul>
-                <li ng-repeat="x in good.concat(encounter) |orderBy: '-initiative'" ng-show="x.hp>0"
-                    style="margin:5px;"><span>{{ x.name }}</span>
-                    <span>{{ x.initiative }}</span></li>
+<base href="/">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="#"><i class="fa fa-home"></i> Home</a></li>
+                <li><a href="encounter"><i class="fa fa-shield"></i> encounter</a></li>
+                <li><a href="adventure_manager"><i class="fa fa-shield"></i> adventures</a></li>
+                <li><a href="armorform"><i class="fa fa-comment"></i> Armor Manager</a></li>
+                <li><a href="characters"><i class="fa fa-comment"></i> Character Manager</a></li>
+                <li><a href="shop"><i class="fa fa-comment"></i> Shop</a></li>
             </ul>
         </div>
-        <div>
-            <h5>Roller</h5>
-            <input type="text" ng-model="roll">
-            <button ng-click="roll_dice(roll)">Roll!</button>
-            <div ng-repeat="r in rolls">{{ r }}</div>
-            <div>{{ roll_sum }}</div>
-        </div>
-    </div>
-    <div style="flex:1 1 50%;display:flex;flex-direction: column;padding: 5px">
-        <h1>Encounter</h1>
-        <h2>The goodies</h2>
-        <party members="good" target="target" attack="attack"></party>
+    </nav>
+</header>
 
-        <h2>The baddies</h2>
-        <party members="encounter" target="target" attack="attack"></party>
-    </div>
-    <div style="flex:1 1 10%;display:flex;flex-direction: column">
-        <h4>Encounters</h4>
-        <div><input type="text" ng-model="biome"></div>
-        <button ng-click="random_encounter(0)">Easy</button>
-        <button ng-click="random_encounter(1)">Medium</button>
-        <button ng-click="random_encounter(2)">Hard</button>
-        <button ng-click="random_encounter(3)">Deadly</button>
-        <h5>Determined Encounter(comma separated)</h5>
-        <input type="text" ng-model="css" style="width:100%">
-        <button ng-click="determined_encounter(css)">Generate</button>
-        <ul>
-            <li ng-repeat="e in encounters" ng-click="$parent.encounter=e">
-                <span>{{e.map(map_name)}}</span>
-                <a style='color:red' ng-click="remove(encounters, $index)">X</a>
-            </li>
-        </ul>
-    </div>
+<!-- MAIN CONTENT AND INJECTED VIEWS -->
+<div id="main">
+
+    <!-- angular templating -->
+    <div ng-view></div>
+    <!-- this is where content will be injected -->
+
 </div>
-{% endverbatim %}
 </body>
+
 </html>

@@ -1,0 +1,9 @@
+<div>
+    <h5>Initiative</h5>
+    <button ng-click="roll_initiative(group)">Roll!</button>
+    <ul>
+        <li ng-repeat="x in group |orderBy: '-initiative'" ng-show="x.hp>0"
+            style="margin:5px;"><span>{{ x.name }}</span>
+            <span>{{ x.initiative }}</span></li>
+    </ul>
+</div>

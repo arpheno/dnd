@@ -1,7 +1,7 @@
 .selected_attack {
     background-color: yellow
 }
-input{border:none;display:inline;width:50px;}
+.party input{border:none;display:inline;width:50px;}
 .member{
     background-color: #f4f4f4;
 flex:0 0 1;

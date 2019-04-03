@@ -1,0 +1,19 @@
+<div style="display: flex;flex-direction: column;">
+    <h3>Adventure:{{ adv.name }}</h3>
+    <div>
+        <div>
+            <span>Title:</span><input type="text" ng-model="adv.name">
+        </div>
+        <div>
+            Text:<textarea ng-model="adv.description"></textarea>
+        </div>
+    </div>
+    <div>
+        <h4>Current Quests</h4>
+        <quest ng-repeat="q in adv.quests" q="q"></quest>
+    </div>
+    <div>
+        <h4>Add Quest</h4>
+        <entityform entitytemplate="qquest" pid="adv.id"></entityform>
+    </div>
+</div>

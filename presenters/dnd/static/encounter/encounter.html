@@ -1,0 +1,65 @@
+<div  style="display: flex;flex-wrap: wrap">
+    <div>
+        <h5>Attack</h5>
+        <div style="display: flex;flex-direction: column">
+            <div><input type="radio"
+                        ng-model="advantage"
+                        value="string"
+                        ng-value=1>Advantage
+            </div>
+            <div><input type="radio"
+                        ng-model="advantage"
+                        value="string"
+                        ng-value=0>No Advantage
+            </div>
+            <div><input type="radio"
+                        ng-model="advantage"
+                        value="string"
+                        ng-value=-1>Disadvantage
+            </div>
+            <button ng-click="execute_attack(target,attack,advantage)">attack</button>
+        </div>
+        <div>
+            <h5>Initiative</h5>
+            <button ng-click="roll_initiative()">Roll!</button>
+            <ul>
+                <li ng-repeat="x in good.concat(encounter) |orderBy: '-initiative'" ng-show="x.hp>0"
+                    style="margin:5px;"><span>{{ x.name }}</span>
+                    <span>{{ x.initiative }}</span></li>
+            </ul>
+        </div>
+        <div>
+            <h5>Roller</h5>
+            <input type="text" ng-model="roll">
+            <button ng-click="roll_dice(roll)">Roll!</button>
+            <div ng-repeat="r in rolls">{{ r }}</div>
+            <div>{{ roll_sum }}</div>
+        </div>
+    </div>
+    <div style="flex:1 1 50%;display:flex;flex-direction: column;padding: 5px">
+        <h1>Encounter</h1>
+        <h2>The goodies</h2>
+        <party members="good" target="target" attack="attack"></party>
+
+        <h2>The baddies</h2>
+        <party members="encounter" target="target" attack="attack"></party>
+    </div>
+    <div style="flex:1 1 10%;display:flex;flex-direction: column">
+        <h4>Encounters</h4>
+        <div><input type="text" ng-model="biome"></div>
+        <button ng-click="random_encounter(0)">Easy</button>
+        <button ng-click="random_encounter(1)">Medium</button>
+        <button ng-click="random_encounter(2)">Hard</button>
+        <button ng-click="random_encounter(3)">Deadly</button>
+        <h5>Determined Encounter(comma separated)</h5>
+        <input type="text" ng-model="css" style="width:100%">
+        <button ng-click="determined_encounter(css)">Generate</button>
+        <ul>
+            <li ng-repeat="e in encounters" ng-click="$parent.encounter=e">
+                <span>{{e.map(map_name)}}</span>
+                <a style='color:red' ng-click="remove(encounters, $index)">X</a>
+            </li>
+        </ul>
+    </div>
+</div>
+</body>

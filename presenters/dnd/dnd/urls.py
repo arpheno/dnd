@@ -21,19 +21,29 @@ from rest_framework.routers import DefaultRouter
 
 from dnd import settings
 from encounter.views import EncounterView, RandomEncounterView, MonsterDetailView, PartyDetailView, CharacterViewSet, \
-    ArmorViewSet, AttackViewSet
-
+    LevelView, FeatureView, EncounterViewSet
+from equipment.views import WeaponViewSet, ArmorViewSet, AdventuringGearViewSet
 # Create a router and register our viewsets with it.
+from quests.views import AdventureViewSet, QuestViewSet
+
 router = DefaultRouter()
 router.register(r'characters', CharacterViewSet)
+router.register(r'encounters', EncounterViewSet)
 router.register(r'armors', ArmorViewSet)
-router.register(r'attacks', AttackViewSet)
+router.register(r'weapons', WeaponViewSet)
+router.register(r'adventuring_gear', AdventuringGearViewSet)
+router.register(r'quests', QuestViewSet)
+router.register(r'adventures', AdventureViewSet)
+
 urlpatterns = [
                   path('admin/', admin.site.urls),
                   path('encounter/', EncounterView.as_view()),
                   path('random_encounter/<str:biome>/<int:difficulty>', RandomEncounterView.as_view()),
                   path(r'monster/<str:slug>/', MonsterDetailView.as_view()),
+                  path(r'api/classes/<str:cls>/level/<int:level>', LevelView.as_view()),
+                  path(r'api/features/<int:index>', FeatureView.as_view()),
                   path(r'party/', PartyDetailView.as_view()),
+                  path('', EncounterView.as_view()),
                   url(r'^api/', include(router.urls))
 
               ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

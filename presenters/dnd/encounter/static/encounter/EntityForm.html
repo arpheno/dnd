@@ -1,0 +1,16 @@
+<div style="display:flex;">
+    <div>
+        <div ng-repeat="(attribute,value) in fields">
+            <span>{{ value.label }}</span>
+            <input ng-show="value.input_type!='choice'"
+                   ng-model="$parent.entity[attribute]"
+                   type="{{ value.input_type }}" d="{{ value.label }}">
+            <select ng-show="value.input_type =='choice'"
+                    ng-model="$parent.entity[attribute]"
+                    type="{{ value.input_type }}">
+                <option ng-repeat="choice in value.choices" value="{{  choice.id}}">{{ choice.name }}</option>
+            </select>
+        </div>
+        <button ng-click="save_entity()">Save</button>
+    </div>
+</div>

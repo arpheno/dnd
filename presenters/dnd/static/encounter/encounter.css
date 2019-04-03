@@ -1,7 +1,18 @@
 .selected_attack {
     background-color: yellow
 }
+.party input{border:none;display:inline;width:50px;}
+.member{
+    background-color: #f4f4f4;
+flex:0 0 1;
+padding:5px;
+margin: 5px;
+min-width: 300px;
+display: flex;
+flex-direction: column;
+}
 .selected_target {
     background-color: #ff96a4;
 }
-input{border:none;display:inline;}
+td{
+    text-align: center;}
