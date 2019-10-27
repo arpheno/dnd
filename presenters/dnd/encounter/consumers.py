@@ -1,8 +1,11 @@
 # chat/consumers.py
 import json
+from pprint import pprint
 
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
+
+from encounter.models import Character
 
 
 class ChatConsumer(WebsocketConsumer):
@@ -28,7 +31,12 @@ class ChatConsumer(WebsocketConsumer):
 
     def receive(self, text_data):
         text_data_json = json.loads(text_data)
-        message = text_data_json['members']
+        members = text_data_json['members']
+        players = text_data_json['players']
+        for player in players:
+            character=Character.objects.get(id=player['id'])
+            character.hitpoints=player['hp']
+            character.save()
         author = text_data_json['author']
         _map = text_data_json['map']
         # Send message to room group
@@ -36,25 +44,28 @@ class ChatConsumer(WebsocketConsumer):
             self.room_group_name,
             {
                 'type': 'chat_message',
-                'members': message,
+                'members': members,
+                'players': players,
                 'author': author,
                 'map': _map,
-                'encounterID':text_data_json['encounterID']
+                'encounterID': text_data_json['encounterID']
             }
         )
 
         # Receive message from room group
 
     def chat_message(self, event):
-        print(event)
-        message = event['members']
+        pprint(event)
+        members = event['members']
+        players = event['players']
         author = event.get('author', 'nobody')
         _map = event.get('map', 'no_map')
 
         # Send message to WebSocket
         self.send(text_data=json.dumps({
-            'members': message,
+            'members': members,
+            'players': players,
             'author': author,
             'map': _map,
-            'encounterID':event.get('encounterID',100)
+            'encounterID': event.get('encounterID', 100)
         }))

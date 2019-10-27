@@ -10,7 +10,7 @@ from rest_framework.serializers import ModelSerializer
 from rest_framework.viewsets import ModelViewSet
 
 from encounter.models import Character, Encounter
-from monsters.browser import load_monsters
+from monsters.browser import load_monsters, stat_to_mod, ability_to_stat
 from party.browser import load_party
 from region import build_random_encounter
 
@@ -33,7 +33,7 @@ class RandomEncounterView(TemplateView):
     template_name = "encounter/encounter_detail.html"
 
     def get_context_data(self, **kwargs):
-        levels = [player['challenge_rating'] for player in load_party().values()]
+        levels = [player.level for player in Character.objects.all()]
         encounter = build_random_encounter(self.kwargs['biome'], levels, self.kwargs['difficulty'])
         pprint(encounter)
         context = encounter
@@ -87,6 +87,9 @@ class CharacterSerializer(ModelSerializer):
         print(validated_data)
         return super(CharacterSerializer, self).create(validated_data)
 
+    def modifiers(self):
+        return {att: stat_to_mod[stat] for att, stat in zip(ability_to_stat, self.scores)}
+
     scores = serializers.DictField()
 
 
@@ -101,12 +104,6 @@ class CharacterDetailSerializer(ModelSerializer):
 class CharacterViewSet(ModelViewSet):
     queryset = Character.objects.all()
     serializer_class = CharacterSerializer
-
-    def get_serializer_class(self):
-        if self.action == 'list':
-            return CharacterDetailSerializer
-        return super(CharacterViewSet, self).get_serializer_class()
-
 
 class LevelView(TemplateView):
     template_name = "encounter/encounter_detail.html"
@@ -142,13 +139,18 @@ class FeatureView(TemplateView):
             **response_kwargs
         )
 
+
 class naivejson(serializers.JSONField):
     def to_representation(self, value):
         try:
-            return json.dumps(eval(value))
+            res = json.dumps(eval(value))
+            print(res)
+            return res
         except:
             print(value)
             return json.dumps(value)
+
+
 class EncounterSerializer(ModelSerializer):
     members = naivejson()
     map = naivejson()

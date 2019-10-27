@@ -41,6 +41,7 @@ class Character(Model):
     alignment = models.CharField(max_length=30)
     speed = models.CharField(max_length=30)
     hitpoints = models.IntegerField()
+    #max_hitpoints = models.IntegerField() TODO!
 
     strength = models.IntegerField()
     dexterity = models.IntegerField()
@@ -82,7 +83,7 @@ class Character(Model):
 
     @property
     def saves(self):
-        return [False] * 6
+        return [False] * 6 #TODO
 
     @property
     def skills(self):
@@ -90,7 +91,7 @@ class Character(Model):
 
     @property
     def attacks(self):
-        return []
+        return [] # TODO
 
     @property
     def languages(self):
