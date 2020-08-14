@@ -3,3 +3,5 @@ django
 pandas
 markdown
 django-filter
+channels
+django-cors-headers

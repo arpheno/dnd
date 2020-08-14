@@ -10,7 +10,9 @@ from rest_framework.serializers import ModelSerializer
 from rest_framework.viewsets import ModelViewSet
 
 from encounter.models import Character, Encounter
-from monsters.browser import load_monsters, stat_to_mod, ability_to_stat
+from equipment.models import Trait, Spell, AdventuringGear, Weapon, Armor
+from equipment.views import TraitSerializer, SpellSerializer, AdventuringGearSerializer
+from monsters.browser import load_monsters
 from party.browser import load_party
 from region import build_random_encounter
 
@@ -76,43 +78,101 @@ class MonsterDetailView(TemplateView):
 
 
 class CharacterSerializer(ModelSerializer):
-    # armor = serializers.StringRelatedField()
-
     class Meta:
         model = Character
-        fields = ['id', 'name', 'scores', 'hitpoints', 'speed', 'alignment',
-                  'monster_type', 'level', 'gold', 'experience', 'race', 'category']
+        fields = ['id', 'name', 'scores', 'modifiers', 'hitpoints', 'speed', 'alignment',
+                  'monster_type', 'level', 'gold', 'experience', 'race', 'category', 'ac', 'armor','traits','known_spells'
+                  ,'adventuringgear_set','weapon_set']
 
     def create(self, validated_data):
         print(validated_data)
         return super(CharacterSerializer, self).create(validated_data)
 
-    def modifiers(self):
-        return {att: stat_to_mod[stat] for att, stat in zip(ability_to_stat, self.scores)}
-
     scores = serializers.DictField()
+    modifiers = serializers.DictField()
+    traits = TraitSerializer(many=True,read_only=True)
+    known_spells = SpellSerializer(many=True,read_only=True)
+    adventuringgear_set = AdventuringGearSerializer(many=True,read_only=True)
 
-
-class CharacterDetailSerializer(ModelSerializer):
-    armor = serializers.StringRelatedField()
-
+class CharacterCreateSerializer(ModelSerializer):
     class Meta:
         model = Character
-        fields = '__all__'
+        fields = ['name', 'scores', 'alignment', 'race', 'category', 'traits','max_hitpoints','speed']
+
+    traits = TraitSerializer(many=True, validators=[], required=False)
+    scores = serializers.DictField()
+
+    def validate_traits(self):
+        print("ASH")
+        return True
+
+    def run_validation(self, data):
+        traits = data.pop('traits')
+        known_spells = data.get('known_spells') and data.pop('known_spells')
+        data = super(CharacterCreateSerializer, self).run_validation(data)
+        data['traits'] = traits
+        data['known_spells'] = known_spells
+        return data
+
+    def create(self, validated_data):
+        traits = validated_data.pop('traits')
+        spells = validated_data.pop('known_spells')
+        validated_data['hitpoints']=validated_data['max_hitpoints']
+        character = Character(**validated_data)
+        character.save()
+        for trait in traits:
+            if trait['type']=='spell':
+                try:
+                    spell = Spell.objects.get(name__iexact=trait['name'])
+                    spell.save()
+                    spell.known_by.add(character)
+                except Spell.DoesNotExist:
+                    print(f"Can't find spell {trait['name']}")
+            elif trait['type']=='gear':
+                for kls in [AdventuringGear,Weapon,Armor]:
+                    try:
+                        o=kls.objects.get(name__iexact=trait['name'])
+                        o.owners.add(character)
+                        break
+                    except kls.DoesNotExist:
+                        pass
+                    except Exception as e:
+                        print(e)
+                        print(trait)
+                        break
+                else:
+                    # a=AdventuringGear(name=trait['name'],description='none',cost=0,weight=0,category='stuff')
+                    # a.save()
+                    # a.owners.add(character)
+                    print(f"Couldnt find a class for {trait}")
+            else:
+                try:
+                    t= Trait.objects.get(name=trait['name'])
+                except Trait.DoesNotExist:
+                    t= Trait(name=trait['name'], type=trait['type'], description=trait.get('description', ''))
+                    t.save()
+                character.traits.add(t)
+        return character
 
 
 class CharacterViewSet(ModelViewSet):
     queryset = Character.objects.all()
-    serializer_class = CharacterSerializer
+    def partial_update(self, request, *args, **kwargs):
+        return super(CharacterViewSet, self).partial_update(request,*args,**kwargs)
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return CharacterCreateSerializer
+        else:
+            return CharacterSerializer
+
 
 class LevelView(TemplateView):
     template_name = "encounter/encounter_detail.html"
 
     def get_context_data(self, **kwargs):
-        print(kwargs['cls'], kwargs['level'])
-        levels = json.load(open('../../levels/5e-SRD-Levels.json'))
+        levels = json.load(open(f'{os.path.dirname(__file__)}/levels/5e-SRD-Levels.json'))
         for level in levels:
-            if level['class']['name'].lower() == kwargs['cls'] and level['level'] == kwargs['level']:
+            if level['class']['name'].lower() == kwargs['cls'].lower() and level['level'] == kwargs['level']:
                 print(level)
                 return level
 
@@ -123,11 +183,32 @@ class LevelView(TemplateView):
         )
 
 
+class LevelView(TemplateView):
+    template_name = "encounter/encounter_detail.html"
+
+    def get_context_data(self, **kwargs):
+        print(kwargs['cls'], kwargs['level'])
+        levels = json.load(open(f'{os.path.dirname(__file__)}/levels/5e-SRD-Levels.json'))
+        for level in levels:
+            if level['class']['name'].lower() == kwargs['cls'].lower() and level['level'] == kwargs['level']:
+                print(level)
+                return level
+
+    def render_to_response(self, context, **response_kwargs):
+        return JsonResponse(
+            context, safe=False,
+            **response_kwargs
+        )
+
+
+import os
+
+
 class FeatureView(TemplateView):
     template_name = "encounter/encounter_detail.html"
 
     def get_context_data(self, **kwargs):
-        features = json.load(open('../../levels/5e-SRD-Features.json'))
+        features = json.load(open(f'{os.path.dirname(__file__)}/levels/5e-SRD-Features.json'))
         for feature in features:
             if feature['index'] == kwargs['index']:
                 print(feature)
@@ -154,6 +235,7 @@ class naivejson(serializers.JSONField):
 class EncounterSerializer(ModelSerializer):
     members = naivejson()
     map = naivejson()
+    players = naivejson()
 
     class Meta:
         model = Encounter

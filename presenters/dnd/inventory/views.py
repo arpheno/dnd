@@ -2,7 +2,7 @@
 from rest_framework.serializers import ModelSerializer
 from rest_framework.viewsets import ModelViewSet
 
-from equipment.models import Weapon, Armor, AdventuringGear, Damage, Trait, Spell
+from equipment.models import Weapon, Armor, AdventuringGear, Damage
 
 
 class DamageSerializer(ModelSerializer):
@@ -14,7 +14,7 @@ class DamageSerializer(ModelSerializer):
 class WeaponSerializer(ModelSerializer):
     class Meta:
         model = Weapon
-        fields = ('id', 'name', 'description', 'damages')
+        fields = ('name', 'description', 'damages')
         depth = 3
 
     damages = DamageSerializer(many=True, read_only=True)
@@ -47,35 +47,3 @@ class AdventuringGearSerializer(ModelSerializer):
 class AdventuringGearViewSet(ModelViewSet):
     queryset = AdventuringGear.objects.all()
     serializer_class = AdventuringGearSerializer
-
-
-class TraitSerializer(ModelSerializer):
-    class Meta:
-        model = Trait
-        fields = ('name', 'type', 'description')
-        lookup_field = 'name'
-        extra_kwargs = {
-            'url': {'lookup_field': 'name'}
-        }
-
-
-class TraitViewSet(ModelViewSet):
-    queryset = Trait.objects.all()
-    serializer_class = TraitSerializer
-    lookup_field = 'name'
-
-
-class SpellSerializer(ModelSerializer):
-    class Meta:
-        model = Spell
-        fields = '__all__'
-        lookup_field = 'name'
-        extra_kwargs = {
-            'url': {'lookup_field': 'name'}
-        }
-
-
-class SpellViewSet(ModelViewSet):
-    queryset = Spell.objects.all()
-    serializer_class = SpellSerializer
-    lookup_field = 'name'

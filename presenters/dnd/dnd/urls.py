@@ -22,7 +22,7 @@ from rest_framework.routers import DefaultRouter
 from dnd import settings
 from encounter.views import EncounterView, RandomEncounterView, MonsterDetailView, PartyDetailView, CharacterViewSet, \
     LevelView, FeatureView, EncounterViewSet
-from equipment.views import WeaponViewSet, ArmorViewSet, AdventuringGearViewSet
+from equipment.views import WeaponViewSet, ArmorViewSet, AdventuringGearViewSet, TraitViewSet, SpellViewSet
 # Create a router and register our viewsets with it.
 from quests.views import AdventureViewSet, QuestViewSet
 
@@ -33,6 +33,8 @@ router.register(r'armors', ArmorViewSet)
 router.register(r'weapons', WeaponViewSet)
 router.register(r'adventuring_gear', AdventuringGearViewSet)
 router.register(r'quests', QuestViewSet)
+router.register(r'traits', TraitViewSet)
+router.register(r'spells', SpellViewSet)
 router.register(r'adventures', AdventureViewSet)
 
 urlpatterns = [
